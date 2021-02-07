@@ -13,5 +13,7 @@ UCLASS()
 class LIGHTPAINTER_API ALightPainterGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+	void BeginPlay() override;
 };

@@ -9,6 +9,6 @@ public class LightPainterTarget : TargetRules
 	{
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-		ExtraModuleNames.AddRange( new string[] { "LightPainter" } );
+		ExtraModuleNames.AddRange( new string[] { "LightPainter", "UMG" } );
 	}
 }

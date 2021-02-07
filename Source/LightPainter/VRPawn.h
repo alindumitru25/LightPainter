@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "HandController.h"
+#include "HandControllerBase.h"
+#include "Save/PainterSaveGame.h"
 #include "VRPawn.generated.h"
 
 UCLASS()
@@ -35,14 +36,26 @@ private:
 	class USceneComponent* VRRoot;
 
 	UPROPERTY()
-	AHandController* LeftController;
+	AHandControllerBase* LeftController;
 
 	UPROPERTY()
-	AHandController* RightController;
+	AHandControllerBase* RightController;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AHandController> ControllerBPClass;
+	TSubclassOf<AHandControllerBase> LeftControllerBPClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AHandControllerBase> RightControllerBPClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	float PaginationThreshold = 0.9;
 
 	void HandleTriggerPressed() { if (RightController) RightController->HandleTriggerPressed(); }
 	void HandleTriggerReleased() { if (RightController) RightController->HandleTriggerReleased(); }
+
+	void PaginateRightAxisInput(float AxisValue);
+	void UpdateCurrentPage(int32 Offset);
+
+	// State
+	int32 LastPaginationOffset = 0;
 };

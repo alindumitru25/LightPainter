@@ -3,6 +3,9 @@
 
 #include "VRPawn.h"
 #include "Camera/CameraComponent.h"
+#include "UI/PaintingPicker/PaintingPicker.h"
+#include "EngineUtils.h"
+#include "VRGameModeBase.h"
 
 // Sets default values
 AVRPawn::AVRPawn()
@@ -22,12 +25,26 @@ void AVRPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	RightController = GetWorld()->SpawnActor<AHandController>(ControllerBPClass);
-	if (RightController != nullptr)
+	if (RightControllerBPClass)
 	{
-		RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
-		RightController->UpdateTrackingSource(EControllerHand::Right);
-		RightController->SetOwner(this);
+		RightController = GetWorld()->SpawnActor<AHandControllerBase>(RightControllerBPClass);
+		if (RightController != nullptr)
+		{
+			RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+			RightController->UpdateTrackingSource(EControllerHand::Right);
+			RightController->SetOwner(this);
+		}
+	}
+
+	if (LeftControllerBPClass)
+	{
+		LeftController = GetWorld()->SpawnActor<AHandControllerBase>(LeftControllerBPClass);
+		if (LeftController != nullptr)
+		{
+			LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+			LeftController->UpdateTrackingSource(EControllerHand::Left);
+			LeftController->SetOwner(this);
+		}
 	}
 }
 
@@ -45,5 +62,28 @@ void AVRPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 	PlayerInputComponent->BindAction(TEXT("RightTrigger"), EInputEvent::IE_Pressed, this, &AVRPawn::HandleTriggerPressed);
 	PlayerInputComponent->BindAction(TEXT("RightTrigger"), EInputEvent::IE_Released, this, &AVRPawn::HandleTriggerReleased);
+
+	PlayerInputComponent->BindAxis(TEXT("PaginateRight"), this, &AVRPawn::PaginateRightAxisInput);
 }
 
+void AVRPawn::PaginateRightAxisInput(float AxisValue)
+{
+	int32 PaginationOffset = 0;
+	PaginationOffset += AxisValue > PaginationThreshold ? 1 : 0;
+	PaginationOffset += AxisValue < -PaginationThreshold ? -1 : 0;
+
+	if (PaginationOffset != LastPaginationOffset && PaginationOffset != 0)
+	{
+		UpdateCurrentPage(PaginationOffset);
+	}
+
+	LastPaginationOffset = PaginationOffset;
+}
+
+void AVRPawn::UpdateCurrentPage(int32 Offset)
+{
+	for (TActorIterator<APaintingPicker> PaintingPickerItr(GetWorld()); PaintingPickerItr; ++PaintingPickerItr)
+	{
+		PaintingPickerItr->UpdateCurrentPage(Offset);
+	}
+}

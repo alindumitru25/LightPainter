@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Save/PainterSaveGame.h"
 #include "Stroke.generated.h"
 
 UCLASS()
@@ -15,12 +16,36 @@ public:
 	// Sets default values for this actor's properties
 	AStroke();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	void Update(FVector CursorLocation);
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	FStrokeState SerializeToStruct() const;
 
+	static AStroke* DeserializeFromStruct(const FStrokeState& StrokeState, UWorld* World);
+
+private:
+
+	FTransform GetNextSegmentTransform(FVector CurrentLocation) const;
+
+	FVector GetNextSegmentScale(FVector CurrentLocation) const;
+
+	FQuat GetNextSegmentRotation(FVector CurrentLocation) const;
+
+	FVector GetNextSegmentLocation(FVector CurrentLocation) const;
+
+	FTransform GetJointTransform(FVector CurrentLocation) const;
+
+	// Components
+	UPROPERTY(VisibleAnywhere)
+		USceneComponent* Root;
+
+	UPROPERTY(VisibleAnywhere)
+		class UInstancedStaticMeshComponent* InstancedMesh;
+
+	UPROPERTY(VisibleAnywhere)
+		class UInstancedStaticMeshComponent* JointMesh;
+
+	// State
+	FVector PreviousCursorLocation;
+
+	TArray<FVector> StateLocations;
 };

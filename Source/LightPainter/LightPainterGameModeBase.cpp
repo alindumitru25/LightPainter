@@ -2,4 +2,11 @@
 
 
 #include "LightPainterGameModeBase.h"
+#include "Kismet/StereoLayerFunctionLibrary.h"
 
+void ALightPainterGameModeBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UStereoLayerFunctionLibrary::HideSplashScreen();
+}
